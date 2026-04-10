@@ -1,18 +1,13 @@
 import PostHog from 'posthog-react-native'
-import Constants from 'expo-constants'
 
-const rawApiKey = Constants.expoConfig?.extra?.posthogProjectToken as string | undefined
-const rawHost = Constants.expoConfig?.extra?.posthogHost as string | undefined
-
-// Trim and normalize API key and host
-const apiKey = rawApiKey?.trim()
-const host = rawHost?.trim()
-const isPostHogConfigured = !!apiKey && apiKey !== '' && apiKey !== 'phc_your_project_token_here'
+const apiKey = process.env.EXPO_PUBLIC_POSTHOG_API_KEY
+const host = process.env.EXPO_PUBLIC_POSTHOG_HOST
+const isPostHogConfigured = !!apiKey && apiKey !== ''
 
 if (!isPostHogConfigured) {
   console.warn(
     'PostHog project token not configured. Analytics will be disabled. ' +
-      'Set POSTHOG_PROJECT_TOKEN in your .env file to enable analytics.'
+      'Set EXPO_PUBLIC_POSTHOG_API_KEY in your .env file to enable analytics.'
   )
 }
 
