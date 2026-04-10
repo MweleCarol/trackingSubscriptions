@@ -122,12 +122,15 @@ const CreateSubscriptionModal = ({
       animationType="slide"
       onRequestClose={handleClose}
     >
+      {/* the KeyboardAvoidingView is used to prevent the input from being hidden by the keyboard - it pushes the content up when the keyboard appears */}
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
         keyboardVerticalOffset={0}
       >
+        {/* The first Pressable - used to close the modal when tapping outside the content */}
         <Pressable className="modal-overlay" onPress={handleClose}>
+          {/* The second Pressable - used to prevent the modal from closing when tapping inside the content and only closes when tapping the x close button */}
           <Pressable
             className="modal-container"
             onPress={(e) => e.stopPropagation()}
