@@ -1,30 +1,17 @@
-import React from "react";
-import {
-  Dimensions,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
-import Svg, {
-  Circle,
-  ClipPath,
-  Defs,
-  G,
-  Path,
-  Rect,
-} from "react-native-svg";
+import React from "react";
+import { Dimensions, Pressable, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import Svg, { Circle, ClipPath, Defs, G, Rect } from "react-native-svg";
 
 const { width: W, height: H } = Dimensions.get("window");
 
 // ── Palette ───────────────────────────────────────────────────────────────
-const BG = "#E8694A";       // main orange-red background
-const NAVY = "#2D3250";     // dark navy
-const CREAM = "#F5F0E8";    // off-white / cream
-const TEAL = "#5BBFAD";     // muted teal
-const PEACH = "#F0C27F";    // warm peach / sand
+const BG = "#E8694A"; // main orange-red background
+const NAVY = "#2D3250"; // dark navy
+const CREAM = "#F5F0E8"; // off-white / cream
+const TEAL = "#5BBFAD"; // muted teal
+const PEACH = "#F0C27F"; // warm peach / sand
 
 // ── Geometric pattern (SVG) ───────────────────────────────────────────────
 // The pattern fills the top ~65% of the screen.
@@ -41,12 +28,7 @@ const GeometricPattern = () => (
         const row = Math.floor(i / 4);
         return (
           <ClipPath key={`clip-${i}`} id={`c${i}`}>
-            <Rect
-              x={col * CELL}
-              y={row * CELL}
-              width={CELL}
-              height={CELL}
-            />
+            <Rect x={col * CELL} y={row * CELL} width={CELL} height={CELL} />
           </ClipPath>
         );
       })}
@@ -65,12 +47,22 @@ const GeometricPattern = () => (
     {/* [0,2] peach full circle */}
     <G clipPath="url(#c2)">
       <Rect x={CELL * 2} y={0} width={CELL} height={CELL} fill={BG} />
-      <Circle cx={CELL * 2 + CELL / 2} cy={CELL / 2} r={CELL / 2} fill={PEACH} />
+      <Circle
+        cx={CELL * 2 + CELL / 2}
+        cy={CELL / 2}
+        r={CELL / 2}
+        fill={PEACH}
+      />
     </G>
     {/* [0,3] peach full circle */}
     <G clipPath="url(#c3)">
       <Rect x={CELL * 3} y={0} width={CELL} height={CELL} fill={BG} />
-      <Circle cx={CELL * 3 + CELL / 2} cy={CELL / 2} r={CELL / 2} fill={PEACH} />
+      <Circle
+        cx={CELL * 3 + CELL / 2}
+        cy={CELL / 2}
+        r={CELL / 2}
+        fill={PEACH}
+      />
     </G>
 
     {/* ── ROW 1 ── */}
@@ -82,12 +74,22 @@ const GeometricPattern = () => (
     {/* [1,1] teal full circle */}
     <G clipPath="url(#c5)">
       <Rect x={CELL} y={CELL} width={CELL} height={CELL} fill={BG} />
-      <Circle cx={CELL + CELL / 2} cy={CELL + CELL / 2} r={CELL / 2} fill={TEAL} />
+      <Circle
+        cx={CELL + CELL / 2}
+        cy={CELL + CELL / 2}
+        r={CELL / 2}
+        fill={TEAL}
+      />
     </G>
     {/* [1,2] peach full circle */}
     <G clipPath="url(#c6)">
       <Rect x={CELL * 2} y={CELL} width={CELL} height={CELL} fill={BG} />
-      <Circle cx={CELL * 2 + CELL / 2} cy={CELL + CELL / 2} r={CELL / 2} fill={PEACH} />
+      <Circle
+        cx={CELL * 2 + CELL / 2}
+        cy={CELL + CELL / 2}
+        r={CELL / 2}
+        fill={PEACH}
+      />
     </G>
     {/* [1,3] BG cell */}
     <G clipPath="url(#c7)">
@@ -127,12 +129,22 @@ const GeometricPattern = () => (
     {/* [3,2] navy full circle */}
     <G clipPath="url(#c14)">
       <Rect x={CELL * 2} y={CELL * 3} width={CELL} height={CELL} fill={BG} />
-      <Circle cx={CELL * 2 + CELL / 2} cy={CELL * 3 + CELL / 2} r={CELL / 2} fill={NAVY} />
+      <Circle
+        cx={CELL * 2 + CELL / 2}
+        cy={CELL * 3 + CELL / 2}
+        r={CELL / 2}
+        fill={NAVY}
+      />
     </G>
     {/* [3,3] teal full circle */}
     <G clipPath="url(#c15)">
       <Rect x={CELL * 3} y={CELL * 3} width={CELL} height={CELL} fill={BG} />
-      <Circle cx={CELL * 3 + CELL / 2} cy={CELL * 3 + CELL / 2} r={CELL / 2} fill={TEAL} />
+      <Circle
+        cx={CELL * 3 + CELL / 2}
+        cy={CELL * 3 + CELL / 2}
+        r={CELL / 2}
+        fill={TEAL}
+      />
     </G>
   </Svg>
 );
@@ -153,7 +165,7 @@ const Splash = () => (
 
         <Pressable
           style={({ pressed }) => [styles.btn, pressed && { opacity: 0.85 }]}
-          onPress={() => router.replace("/sign-in")}
+          onPress={() => router.replace("/(tabs)")}
         >
           <Text style={styles.btnText}>Get Started</Text>
         </Pressable>
