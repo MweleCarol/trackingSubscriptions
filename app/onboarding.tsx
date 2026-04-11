@@ -3,17 +3,16 @@ import { router } from "expo-router";
 import { styled } from "nativewind";
 import React, { useRef, useState } from "react";
 import {
-  Dimensions,
   FlatList,
   Image,
   Pressable,
   Text,
+  useWindowDimensions,
   View,
 } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 
 const SafeAreaView = styled(RNSafeAreaView);
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 // ── Guide steps ───────────────────────────────────────────────────────────
 const STEPS = [
@@ -78,6 +77,7 @@ const Dots = ({ total, active }: { total: number; active: number }) => (
 
 // ── Main page ─────────────────────────────────────────────────────────────
 const Onboarding = () => {
+  const { width: screenWidth } = useWindowDimensions();
   const [activeIndex, setActiveIndex] = useState(0);
   const flatListRef = useRef<FlatList>(null);
   const isLast = activeIndex === STEPS.length - 1;
@@ -142,7 +142,7 @@ const Onboarding = () => {
         renderItem={({ item }) => (
           <View
             style={{
-              width: SCREEN_WIDTH,
+              width: screenWidth,
               flex: 1,
               alignItems: "center",
               justifyContent: "center",

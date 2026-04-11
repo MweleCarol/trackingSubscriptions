@@ -10,12 +10,28 @@ import { useSubscriptionStore } from "@/lib/subscriptionStore";
 import { formatCurrency } from "@/lib/utils";
 import { useUser } from "@clerk/expo";
 import dayjs from "dayjs";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { styled } from "nativewind";
 import { usePostHog } from "posthog-react-native";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { FlatList, Image, Pressable, Text, View } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
+
+/**
+ * FNV-32a hash — deterministic, non-reversible, no external deps.
+ * Used to pseudonymise subscription IDs before sending to PostHog so
+ * raw entity identifiers are never transmitted as telemetry.
+ * Salt: "subtrack_v1" (change to rotate if IDs are ever compromised).
+ */
+function fnv32a(value: string, salt = "subtrack_v1"): string {
+  const input = salt + value;
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < input.length; i++) {
+    hash ^= input.charCodeAt(i);
+    hash = (hash * 0x01000193) >>> 0;
+  }
+  return hash.toString(16).padStart(8, "0");
+}
 
 const SafeAreaView = styled(RNSafeAreaView);
 
@@ -28,19 +44,27 @@ export default function App() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const { subscriptions, addSubscription } = useSubscriptionStore();
 
-  // Get upcoming subscriptions (active subscriptions with renewal date within next 7 days)
+  // Refreshes whenever the tab comes into focus so the window is never stale.
+  const [now, setNow] = useState(() => dayjs());
+  useFocusEffect(
+    useCallback(() => {
+      setNow(dayjs());
+    }, []),
+  );
+
+  // Get upcoming subscriptions (active, renewing today through 7 days from now).
+  // Uses isSameOrAfter / isSameOrBefore so boundary days are included.
   const upcomingSubscriptions = useMemo(() => {
-    const now = dayjs();
-    const nextWeek = now.add(7, "days");
+    const windowEnd = now.add(7, "days");
     return subscriptions
       .filter(
         (sub) =>
           sub.status === "active" &&
-          dayjs(sub.renewalDate).isAfter(now) &&
-          dayjs(sub.renewalDate).isBefore(nextWeek),
+          dayjs(sub.renewalDate).isSameOrAfter(now, "day") &&
+          dayjs(sub.renewalDate).isSameOrBefore(windowEnd, "day"),
       )
       .sort((a, b) => dayjs(a.renewalDate).diff(dayjs(b.renewalDate)));
-  }, [subscriptions]);
+  }, [subscriptions, now]);
 
   const handleSubscriptionPress = (item: Subscription) => {
     const isExpanding = expandedSubscriptionId !== item.id;
@@ -50,8 +74,9 @@ export default function App() {
     posthog.capture(
       isExpanding ? "subscription_expanded" : "subscription_collapsed",
       {
-        subscription_name: item.name,
-        subscription_id: item.id,
+        // Hashed ID (FNV-32a, salt: "subtrack_v1") — not reversible to original
+        hashed_subscription_id: fnv32a(item.id),
+        subscription_category: item.category ?? "uncategorised",
       },
     );
   };
@@ -59,10 +84,10 @@ export default function App() {
   const handleCreateSubscription = (newSubscription: Subscription) => {
     addSubscription(newSubscription);
     posthog.capture("subscription_created", {
-      subscription_name: newSubscription.name,
+      // subscription_name removed — PII; use category as coarse signal instead
       subscription_price: newSubscription.price,
       subscription_frequency: newSubscription.frequency,
-      subscription_category: newSubscription.category,
+      subscription_category: newSubscription.category ?? "uncategorised",
     });
   };
 
