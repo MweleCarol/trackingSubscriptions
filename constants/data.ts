@@ -105,3 +105,24 @@ export const HOME_SUBSCRIPTIONS: Subscription[] = [
     color: "#b8e8d0",
   },
 ];
+
+// ── Insights: weekly spending chart ───────────────────────────────────────
+export const WEEKLY_CHART_DATA: WeeklyChartEntry[] = [
+  { day: "Mon", value: 35 },
+  { day: "Tue", value: 28 },
+  { day: "Wed", value: 22 },
+  { day: "Thu", value: 40 },
+  { day: "Fri", value: 30 },
+  { day: "Sat", value: 18 },
+  { day: "Sun", value: 20 },
+];
+
+export const WEEKLY_CHART_Y_LABELS: number[] = [0, 5, 15, 25, 35, 45];
+
+// ── Insights: expenses summary ────────────────────────────────────────────
+export const INSIGHTS_EXPENSES = {
+  amount: -424.63,
+  currency: "USD",
+  period: "March 2026",
+  changePercent: 12, // positive = increase
+};

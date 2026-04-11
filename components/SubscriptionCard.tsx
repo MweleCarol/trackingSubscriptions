@@ -33,6 +33,14 @@ const SubscriptionCard = ({
     ? "*****" + paymentMethod.replace(/\D/g, "").slice(-4)
     : "N/A";
 
+  // Subscriptions page: always show the plan name under the title
+  // Home page: category → plan → renewal date
+  const metaLabel = showActions
+    ? (plan?.trim() ?? "")
+    : category?.trim() ||
+      plan?.trim() ||
+      (renewalDate ? formatSubscriptionDateTime(renewalDate) : "");
+
   return (
     <Pressable
       onPress={onPress}
@@ -48,9 +56,7 @@ const SubscriptionCard = ({
               {name}
             </Text>
             <Text numberOfLines={1} ellipsizeMode="tail" className="sub-meta">
-              {category?.trim() ||
-                plan?.trim() ||
-                (renewalDate ? formatSubscriptionDateTime(renewalDate) : "")}
+              {metaLabel}
             </Text>
           </View>
         </View>
@@ -64,7 +70,7 @@ const SubscriptionCard = ({
       {expanded && (
         <View className="sub-bdy">
           {showActions ? (
-            /* ── Subscriptions page layout ── */
+            /* ── Subscriptions page: payment info + plan + cancel ── */
             <>
               {/* Payment info row */}
               <View className="sub-row">
@@ -118,7 +124,6 @@ const SubscriptionCard = ({
                     borderRadius: 999,
                     paddingHorizontal: 18,
                     paddingVertical: 5,
-                    marginTop: 6,
                   }}
                 >
                   <Text
@@ -133,14 +138,14 @@ const SubscriptionCard = ({
                 </TouchableOpacity>
               </View>
 
-              {/* Cancel Subscription button — full width dark pill */}
+              {/* Cancel Subscription — full-width dark pill */}
               <TouchableOpacity
                 activeOpacity={0.85}
                 onPress={() => cancelSubscription(id)}
                 style={{
                   backgroundColor: "#1a1a1a",
                   borderRadius: 999,
-                  paddingVertical: 6,
+                  paddingVertical: 15,
                   alignItems: "center",
                   marginTop: 6,
                   width: "100%",
