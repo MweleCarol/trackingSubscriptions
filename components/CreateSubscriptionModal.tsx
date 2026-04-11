@@ -91,7 +91,8 @@ const CreateSubscriptionModal = ({
     };
 
     onSubmit(newSubscription);
-
+    
+    // Track subscription creation with PostHog, including all relevant properties for better analytics
     posthog.capture("subscription_created", {
       subscription_name: name.trim(),
       subscription_price: priceValue,

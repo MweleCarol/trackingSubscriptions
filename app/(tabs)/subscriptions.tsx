@@ -43,6 +43,7 @@ const Subscriptions = () => {
         renderItem={({ item }) => (
           <SubscriptionCard
             {...item}
+            showActions={true}
             expanded={expandedId === item.id}
             onPress={() =>
               setExpandedId(expandedId === item.id ? null : item.id)
@@ -57,9 +58,9 @@ const Subscriptions = () => {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
-        contentContainerClassName="pb-30"
       />
     </SafeAreaView>
   );
 };
+
 export default Subscriptions;

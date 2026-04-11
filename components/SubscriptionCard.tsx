@@ -1,3 +1,4 @@
+import { useSubscriptionStore } from "@/lib/subscriptionStore";
 import {
   formatCurrency,
   formatStatusLabel,
@@ -5,9 +6,10 @@ import {
 } from "@/lib/utils";
 import clsx from "clsx";
 import React from "react";
-import { Image, Pressable, Text, View } from "react-native";
+import { Image, Pressable, Text, TouchableOpacity, View } from "react-native";
 
 const SubscriptionCard = ({
+  id,
   name,
   price,
   currency,
@@ -22,13 +24,22 @@ const SubscriptionCard = ({
   paymentMethod,
   startDate,
   status,
-}: SubscriptionCardProps) => {
+  showActions,
+}: SubscriptionCardProps & { showActions?: boolean }) => {
+  const { cancelSubscription } = useSubscriptionStore();
+
+  // Mask payment method to last 4 digits
+  const maskedPayment = paymentMethod
+    ? "*****" + paymentMethod.replace(/\D/g, "").slice(-4)
+    : "N/A";
+
   return (
     <Pressable
       onPress={onPress}
       className={clsx("sub-card", expanded ? "sub-card-expanded" : "bg-card")}
       style={!expanded && color ? { backgroundColor: color } : undefined}
     >
+      {/* ── Header row (always visible) ── */}
       <View className="sub-head">
         <View className="sub-main">
           <Image source={icon} className="sub-icon" />
@@ -48,72 +59,174 @@ const SubscriptionCard = ({
           <Text className="sub-billing">{billing}</Text>
         </View>
       </View>
+
+      {/* ── Expanded body ── */}
       {expanded && (
         <View className="sub-bdy">
-          <View className="sub-details">
-            <View className="sub-row">
-              <View className="sub-row-copy">
-                <Text className="sub-label">Payment:</Text>
-                <Text
-                  className="sub-value"
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
+          {showActions ? (
+            /* ── Subscriptions page layout ── */
+            <>
+              {/* Payment info row */}
+              <View className="sub-row">
+                <View className="sub-row-copy">
+                  <Text className="sub-label">Payment info:</Text>
+                  <Text
+                    className="sub-value"
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    {maskedPayment}
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  style={{
+                    borderWidth: 1.5,
+                    borderColor: "#1a1a1a",
+                    borderRadius: 999,
+                    paddingHorizontal: 18,
+                    paddingVertical: 5,
+                  }}
                 >
-                  {paymentMethod?.trim() ?? 'not Provided'}
-                </Text>
+                  <Text
+                    style={{
+                      fontSize: 13,
+                      fontWeight: "600",
+                      color: "#1a1a1a",
+                    }}
+                  >
+                    Manage
+                  </Text>
+                </TouchableOpacity>
               </View>
-            </View>
 
-            <View className="sub-row">
-              <View className="sub-row-copy">
-                <Text className="sub-label">Category:</Text>
-                <Text
-                  className="sub-value"
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
+              {/* Plan details row */}
+              <View className="sub-row">
+                <View className="sub-row-copy">
+                  <Text className="sub-label">Plan details:</Text>
+                  <Text
+                    className="sub-value"
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    {plan?.trim() ?? "N/A"}
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  style={{
+                    borderWidth: 1.5,
+                    borderColor: "#1a1a1a",
+                    borderRadius: 999,
+                    paddingHorizontal: 18,
+                    paddingVertical: 5,
+                    marginTop: 6,
+                  }}
                 >
-                  {(category?.trim() || plan?.trim()) ?? 'not Provided'}
-                </Text>
+                  <Text
+                    style={{
+                      fontSize: 13,
+                      fontWeight: "600",
+                      color: "#1a1a1a",
+                    }}
+                  >
+                    Change
+                  </Text>
+                </TouchableOpacity>
               </View>
-            </View>
 
-            <View className="sub-row">
-              <View className="sub-row-copy">
-                <Text className="sub-label">Started:</Text>
+              {/* Cancel Subscription button — full width dark pill */}
+              <TouchableOpacity
+                activeOpacity={0.85}
+                onPress={() => cancelSubscription(id)}
+                style={{
+                  backgroundColor: "#1a1a1a",
+                  borderRadius: 999,
+                  paddingVertical: 6,
+                  alignItems: "center",
+                  marginTop: 6,
+                  width: "100%",
+                }}
+              >
                 <Text
-                  className="sub-value"
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
+                  style={{
+                    color: "#ffffff",
+                    fontSize: 15,
+                    fontWeight: "700",
+                    letterSpacing: 0.2,
+                  }}
                 >
-                  {startDate ? formatSubscriptionDateTime(startDate) : ""}
+                  Cancel Subscription
                 </Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            /* ── Home page: full detail rows ── */
+            <View className="sub-details">
+              <View className="sub-row">
+                <View className="sub-row-copy">
+                  <Text className="sub-label">Payment:</Text>
+                  <Text
+                    className="sub-value"
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    {paymentMethod?.trim() ?? "not Provided"}
+                  </Text>
+                </View>
+              </View>
+
+              <View className="sub-row">
+                <View className="sub-row-copy">
+                  <Text className="sub-label">Category:</Text>
+                  <Text
+                    className="sub-value"
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    {(category?.trim() || plan?.trim()) ?? "not Provided"}
+                  </Text>
+                </View>
+              </View>
+
+              <View className="sub-row">
+                <View className="sub-row-copy">
+                  <Text className="sub-label">Started:</Text>
+                  <Text
+                    className="sub-value"
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    {startDate ? formatSubscriptionDateTime(startDate) : ""}
+                  </Text>
+                </View>
+              </View>
+
+              <View className="sub-row">
+                <View className="sub-row-copy">
+                  <Text className="sub-label">Renewal date:</Text>
+                  <Text
+                    className="sub-value"
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    {renewalDate ? formatSubscriptionDateTime(renewalDate) : ""}
+                  </Text>
+                </View>
+              </View>
+
+              <View className="sub-row">
+                <View className="sub-row-copy">
+                  <Text className="sub-label">Status:</Text>
+                  <Text
+                    className="sub-value"
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    {status ? formatStatusLabel(status) : ""}
+                  </Text>
+                </View>
               </View>
             </View>
-            <View className="sub-row">
-              <View className="sub-row-copy">
-                <Text className="sub-label">Renewal date:</Text>
-                <Text
-                  className="sub-value"
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
-                >
-                  {renewalDate ? formatSubscriptionDateTime(renewalDate) : ""}
-                </Text>
-              </View>
-            </View>
-            <View className="sub-row">
-              <View className="sub-row-copy">
-                <Text className="sub-label">Status:</Text>
-                <Text
-                  className="sub-value"
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
-                >
-                  {status ? formatStatusLabel(status) : ""}
-                </Text>
-              </View>
-            </View>
-          </View>
+          )}
         </View>
       )}
     </Pressable>
