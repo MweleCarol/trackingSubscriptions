@@ -10,6 +10,8 @@ import { useSubscriptionStore } from "@/lib/subscriptionStore";
 import { formatCurrency } from "@/lib/utils";
 import { useUser } from "@clerk/expo";
 import dayjs from "dayjs";
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import { router, useFocusEffect } from "expo-router";
 import { styled } from "nativewind";
 import { usePostHog } from "posthog-react-native";
@@ -17,21 +19,9 @@ import { useCallback, useMemo, useState } from "react";
 import { FlatList, Image, Pressable, Text, View } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 
-/**
- * FNV-32a hash — deterministic, non-reversible, no external deps.
- * Used to pseudonymise subscription IDs before sending to PostHog so
- * raw entity identifiers are never transmitted as telemetry.
- * Salt: "subtrack_v1" (change to rotate if IDs are ever compromised).
- */
-function fnv32a(value: string, salt = "subtrack_v1"): string {
-  const input = salt + value;
-  let hash = 0x811c9dc5;
-  for (let i = 0; i < input.length; i++) {
-    hash ^= input.charCodeAt(i);
-    hash = (hash * 0x01000193) >>> 0;
-  }
-  return hash.toString(16).padStart(8, "0");
-}
+dayjs.extend(isSameOrAfter);
+dayjs.extend(isSameOrBefore);
+
 
 const SafeAreaView = styled(RNSafeAreaView);
 
@@ -60,6 +50,8 @@ export default function App() {
       .filter(
         (sub) =>
           sub.status === "active" &&
+          !!sub.renewalDate &&
+          dayjs(sub.renewalDate).isValid() &&
           dayjs(sub.renewalDate).isSameOrAfter(now, "day") &&
           dayjs(sub.renewalDate).isSameOrBefore(windowEnd, "day"),
       )
@@ -74,8 +66,6 @@ export default function App() {
     posthog.capture(
       isExpanding ? "subscription_expanded" : "subscription_collapsed",
       {
-        // Hashed ID (FNV-32a, salt: "subtrack_v1") — not reversible to original
-        hashed_subscription_id: fnv32a(item.id),
         subscription_category: item.category ?? "uncategorised",
       },
     );
