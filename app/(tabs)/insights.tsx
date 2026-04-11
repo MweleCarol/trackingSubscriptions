@@ -82,7 +82,7 @@ const ExpensesCard = () => (
         <Text style={{ fontSize: 17, fontWeight: "700", color: "#1a1a1a" }}>
           {formatCurrency(INSIGHTS_EXPENSES.amount, INSIGHTS_EXPENSES.currency)}
         </Text>
-        <Text style={{ fontSize: 13, color: "#4caf50", marginTop: 3 }}>
+        <Text style={{ fontSize: 13, color: "#FF0000", marginTop: 3 }}>
           +{INSIGHTS_EXPENSES.changePercent}%
         </Text>
       </View>
@@ -149,7 +149,7 @@ const HistoryCard = ({ item }: { item: Subscription }) => {
           {formatCurrency(item.price, item.currency)}
         </Text>
         <Text style={{ fontSize: 12, color: "#555", marginTop: 2 }}>
-          per month
+          {item.billing === "Yearly" ? "per year" : "per month"}
         </Text>
       </View>
     </View>
